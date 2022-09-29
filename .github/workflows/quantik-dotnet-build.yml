@@ -2,6 +2,10 @@ name: Quantik .NET Build
 
 on:
   workflow_call:
+    secrets: 
+      nuget-auth-token: 
+        required: false
+        description: 'The PAT for accessing the nuget local repo'
     inputs: 
       working-directory:
         required: true
@@ -14,6 +18,11 @@ on:
         type: string
         default: normal 
       
+      
+      nuget-source-url:
+        required: false
+        type: string
+        default: https://nuget.pkg.github.com/quantik-no/index.json
       dotnet-version:
         required: false
         type: string
@@ -32,9 +41,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v2
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
+        source-url: ${{ inputs.nuget-source-url }}
+      env:
+          NUGET_AUTH_TOKEN: ${{ secrets.nuget-auth-token }}
     - name: Install dependencies
       run: dotnet restore
     - name: Build
