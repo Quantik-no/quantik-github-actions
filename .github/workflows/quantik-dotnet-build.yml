@@ -1,0 +1,44 @@
+name: Quantik .NET Build
+
+on:
+  workflow_call:
+    inputs: 
+      working-directory:
+        required: true
+        type: string
+      testing-directory:
+        required: true
+        type: string
+      tests-verbosity:
+        required: false
+        type: string
+        default: normal 
+      
+      dotnet-version:
+        required: false
+        type: string
+        default: '6.0.x'
+      dotnet-configuration: 
+        required: false
+        type: string
+        default: 'Release'
+jobs:
+  build-and-test:
+    name: Builds and tests .NET 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '${{ inputs.working-directory }}'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration ${{ inputs.dotnet-configuration }} --no-restore
+    - name: Test
+      working-directory: '${{ inputs.testing-directory }}'
+      run: dotnet test --verbosity=${{ inputs.tests-verbosity }}
