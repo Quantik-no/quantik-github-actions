@@ -2,23 +2,25 @@ name: Quantik .NET Build
 
 on:
   workflow_call:
-    secrets: 
-      nuget-auth-token: 
+    secrets:
+      nuget-auth-token:
         required: false
         description: 'The PAT for accessing the nuget local repo'
-    inputs: 
+    inputs:
       working-directory:
-        required: true
+        required: false
+        default: "."
         type: string
       testing-directory:
-        required: true
+        required: false
+        default: "."
         type: string
       tests-verbosity:
         required: false
         type: string
-        default: normal 
-      
-      
+        default: normal
+
+
       nuget-source-url:
         required: false
         type: string
@@ -27,13 +29,13 @@ on:
         required: false
         type: string
         default: '6.0.x'
-      dotnet-configuration: 
+      dotnet-configuration:
         required: false
         type: string
         default: 'Release'
 jobs:
   build-and-test:
-    name: Builds and tests .NET 
+    name: Builds and tests .NET
     runs-on: ubuntu-latest
     defaults:
       run:
