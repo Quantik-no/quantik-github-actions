@@ -116,7 +116,7 @@ jobs:
 
       - name: Login to azure dev docker registry
         uses: azure/docker-login@v1
-        if: ${{ env.PERFORM_PUSH }}
+        if: env.PERFORM_PUSH == 'true'
         with:
           login-server: ${{ secrets.acr-name }}
           username: ${{ secrets.acr-username }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Authenticate to Google Cloud
         id: auth
-        if: ${{ env.PERFORM_PUSH }}
+        if: env.PERFORM_PUSH == 'true'
         uses: 'google-github-actions/auth@v0.8.1'
         with:
           workload_identity_provider: '${{ inputs.gcp-oidc }}'
@@ -133,7 +133,7 @@ jobs:
           access_token_lifetime: "300s"
 
       - name: sign-in to artifact registry
-        if: ${{ env.PERFORM_PUSH }}
+        if: env.PERFORM_PUSH == 'true'
         run: |
           gcloud auth configure-docker europe-docker.pkg.dev --quiet
 
