@@ -77,7 +77,7 @@ jobs:
         id: git_describe_semver
         continue-on-error: true
         with:
-          args: git-describe-semver --prerelease-timestamped  --fallback v0.0.0 --drop-prefix --format "::set-output name=version::<version>"
+          args: --prerelease-timestamped  --fallback v0.0.0 --drop-prefix --format "::set-output name=version::<version>"
 
       - name: Docker meta semver version
         id: meta-semver
