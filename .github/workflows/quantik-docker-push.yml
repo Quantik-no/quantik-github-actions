@@ -46,7 +46,10 @@ on:
         required: false
         type: string
         default: "Dockerfile"
-
+      pull-before-push:
+        required: false
+        type: boolean
+        default: false
       context:
         required: false
         type: string
@@ -157,6 +160,7 @@ jobs:
           context: ${{ inputs.context }}
           platforms: linux/amd64  #,linux/arm64
           file: ${{ inputs.working-directory }}/${{ inputs.dockerfile }}
+          pull: ${{ inputs.pull-before-push }}
           push: ${{ env.PERFORM_PUSH }}
           tags: |
             ${{ steps.meta.outputs.tags }}
