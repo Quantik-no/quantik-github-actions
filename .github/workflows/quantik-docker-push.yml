@@ -7,11 +7,11 @@ on:
         required: false
         description: 'The PAT for accessing the nuget local repo'
       acr-password:
-        required: true
+        required: false
       acr-name:
-        required: true
+        required: false
       acr-username:
-        required: true
+        required: false
 
     inputs:
       working-directory:
@@ -53,7 +53,7 @@ on:
         default: "."
 
       gar-name:
-        required: true
+        required: false
         type: string
 
 
@@ -63,6 +63,7 @@ jobs:
 
     env:
       NUGET_AUTH_TOKEN: ${{ secrets.nuget_auth_token }}
+      PERFORM_PUSH: ${{ github.event_name != 'pull_request' }}
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -113,6 +114,7 @@ jobs:
 
       - name: Login to azure dev docker registry
         uses: azure/docker-login@v1
+        if: ${{ env.PERFORM_PUSH }}
         with:
           login-server: ${{ secrets.acr-name }}
           username: ${{ secrets.acr-username }}
@@ -120,6 +122,7 @@ jobs:
 
       - name: Authenticate to Google Cloud
         id: auth
+        if: ${{ env.PERFORM_PUSH }}
         uses: 'google-github-actions/auth@v0.8.1'
         with:
           workload_identity_provider: '${{ inputs.gcp-oidc }}'
@@ -128,6 +131,7 @@ jobs:
           access_token_lifetime: "300s"
 
       - name: sign-in to artifact registry
+        if: ${{ env.PERFORM_PUSH }}
         run: |
           gcloud auth configure-docker europe-docker.pkg.dev --quiet
 
@@ -151,7 +155,7 @@ jobs:
           context: ${{ inputs.context }}
           platforms: linux/amd64  #,linux/arm64
           file: ${{ inputs.working-directory }}/${{ inputs.dockerfile }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ env.PERFORM_PUSH }}
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ steps.meta-fallback.outputs.tags }}
