@@ -13,7 +13,6 @@ on:
       acr-username:
         required: true
 
-
     inputs:
       working-directory:
         required: false
@@ -27,28 +26,32 @@ on:
         required: false
         type: string
         default: https://nuget.pkg.github.com/quantik-no/index.json
+
       image-name:
         required: false
         type: string
         default: "${{ github.event.repository.name }}"
 
-
       gcp-oidc:
         required: false
         type: string
         default: projects/545027634067/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider
+
       gcp-sa:
         required: false
         default: github-actions-sa@qt-github-oidc.iam.gserviceaccount.com
         type: string
+
       dockerfile:
         required: false
         type: string
         default: "Dockerfile"
+
       context:
         required: false
         type: string
         default: "."
+
       gar-name:
         required: true
         type: string
@@ -64,18 +67,16 @@ jobs:
       run:
         working-directory: ${{ inputs.working-directory }}
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
-      -
-        uses: docker://ghcr.io/choffmeister/git-describe-semver
+
+      - uses: docker://ghcr.io/choffmeister/git-describe-semver
         id: git_describe_semver
         continue-on-error: true
         with:
           args: git-describe-semver --prerelease-timestamped  --fallback v0.0.0 --drop-prefix --format "::set-output name=version::<version>"
-      -
 
-        name: Docker meta semver version
+      - name: Docker meta semver version
         id: meta-semver
         uses: docker/metadata-action@v4
         if: steps.git_describe_semver.outcome == 'success'
@@ -90,15 +91,12 @@ jobs:
             type=sha,format=long
             type=raw,value=${{ steps.git_describe_semver.outputs.version }}
 
-
-      -
-        name: Docker meta
+      - name: Docker meta
         id: fallback-version
         if: steps.git_describe_semver.outcome == 'failure'
         run: echo "::set-output name=version::$(printf '%(%Y-%m-%d)T' -1)-$(printf "%05d" ${{ github.run_number }})"
 
-      -
-        name: Docker meta fallback version
+      - name: Docker meta fallback version
         id: meta-fallback
         uses: docker/metadata-action@v4
         if: steps.git_describe_semver.outcome == 'failure'
@@ -132,29 +130,28 @@ jobs:
       - name: sign-in to artifact registry
         run: |
           gcloud auth configure-docker europe-docker.pkg.dev --quiet
-      -
-        name: Setup .NET Core
+
+      - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           source-url: ${{ inputs.nuget-source-url }}
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.nuget-auth-token }}
-      -
-        name: Set up QEMU
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Build and push
+
+      - name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.context }}
           platforms: linux/amd64  #,linux/arm64
           file: ${{ inputs.working-directory }}/${{ inputs.dockerfile }}
-          push: true
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ steps.meta-fallback.outputs.tags }}
@@ -163,50 +160,7 @@ jobs:
             ${{ steps.meta.outputs.labels }}
             ${{ steps.meta-fallback.outputs.labels }}
 
-#          build-args: |
-#            GIT_COMMIT_SHA=${{ github.sha }}
-#            NUGET_PRIVATE_USER=${{ secrets.PACKAGE_READER_USERNAME }}
-#            NUGET_PRIVATE_PWD=${{ secrets.PACKAGE_READER_PAT }}
           secret-files: |
             nugetconfig=${{ github.workspace }}/../nuget.config
             nugetpublic=${{ github.workspace }}/nuget.config
-
-
-  #     - name: Build and push docker image
-  #       run: |
-  #         docker build \
-  #           -t ${{ inputs.acr-name }}:${{ github.sha }} \
-  #           -t ${{ inputs.gar-name }}:${{ github.sha }} \
-  #           -f ${{ inputs.dockerfile }} \
-
-  #           --label "git-commit-sha=${{ github.sha }}" \
-  #           --label "git-repository-url=${{ github.repositoryUrl }}" \
-  #           --build-arg=GIT_COMMIT_SHA=${{ github.sha }} \
-  #           --build-arg=NUGET_PRIVATE_USER=${{ secrets.PACKAGE_READER_USERNAME }} \
-  #           --build-arg=NUGET_PRIVATE_PWD=${{ secrets.PACKAGE_READER_PAT }} \
-  #           ${{ inputs.context }}
-  #         docker push ${{ inputs.acr-name }}:${{ github.sha }}
-  # docker-tag:
-  #   runs-on: ubuntu-latest
-  #   needs: [build-and-test, docker-build-and-push]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Login to dev docker registry
-  #       uses: azure/docker-login@v1
-  #       with:
-  #         login-server: ${{ secrets.DEV_ADMIN_DOCKER_REGISTRY }}
-  #         username: ${{ secrets.DEV_ADMIN_DOCKER_REGISTRY_USERNAME }}
-  #         password: ${{ secrets.DEV_ADMIN_DOCKER_REGISTRY_PASSWORD }}
-  #     - name: Pull and update tag
-  #       run: |
-  #         docker pull ${{ inputs.acr-name }}:${{ github.sha }}
-  #         docker tag  ${{ inputs.acr-name }}:${{ github.sha }} ${{ inputs.acr-name }}:latest
-  #         docker tag  ${{ inputs.acr-name }}:${{ github.sha }} ${{ inputs.acr-name }}:$(git describe --tags --long)
-  #         docker push ${{ inputs.acr-name }} --all-tags
-  #           docker push ${{ inputs.acr-name }} --all-tags
-  #     - name: Logout of docker registry
-  #       run: docker logout
-
 
