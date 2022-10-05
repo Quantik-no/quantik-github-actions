@@ -102,7 +102,7 @@ jobs:
             type=sha,format=long
             type=raw,value=${{ steps.git_describe_semver.outputs.version }}
 
-      - name: Docker meta
+      - name: Docker meta for semver fallback
         id: fallback-version
         if: steps.git_describe_semver.outcome == 'failure'
         run: echo "::set-output name=version::$(printf '%(%Y-%m-%d)T' -1)-$(printf "%05d" ${{ github.run_number }})"
@@ -122,7 +122,7 @@ jobs:
             type=sha,format=long
             type=raw,value=${{ steps.fallback-version.outputs.version }}
 
-      - name: Docker meta
+      - name: Docker meta for pull before push
         id: pull-repo
         if: inputs.pull-repo != ''
         uses: docker/metadata-action@v4
@@ -178,12 +178,12 @@ jobs:
           pull: ${{ inputs.pull-before-push }}
           push: ${{ env.PERFORM_PUSH }}
           tags: |
-            ${{ steps.meta.outputs.tags }}
+            ${{ steps.meta-semver.outputs.tags }}
             ${{ steps.meta-fallback.outputs.tags }}
             ${{ steps.pull-repo.outputs.tags }}
 
           labels: |
-            ${{ steps.meta.outputs.labels }}
+            ${{ steps.meta-semver.outputs.labels }}
             ${{ steps.meta-fallback.outputs.labels }}
 
           secret-files: |
