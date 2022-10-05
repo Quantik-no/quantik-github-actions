@@ -128,7 +128,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ inputs.pull-repo-tags-base }}/${{ inputs.image-name }}
+            ${{ inputs.pull-repo }}/${{ inputs.image-name }}
           tags: |
             type=sha,format=long
 
