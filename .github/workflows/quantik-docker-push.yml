@@ -61,7 +61,9 @@ on:
       gar-name:
         required: false
         type: string
-
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read
 
 jobs:
   docker-build-and-push:
