@@ -54,7 +54,10 @@ on:
         required: false
         type: string
         default: "."
-
+      pull-repo:
+        required: false
+        type: string
+        description: "An input for setting an extra repo in case you want to pull from e.g dev and push to prod"
       gar-name:
         required: false
         type: string
@@ -117,6 +120,16 @@ jobs:
             type=sha,format=long
             type=raw,value=${{ steps.fallback-version.outputs.version }}
 
+      - name: Docker meta
+        id: pull-repo
+        if: inputs.pull-repo != ''
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ inputs.pull-repo-tags-base }}/${{ inputs.image-name }}
+          tags: |
+            type=sha,format=long
+
       - name: Login to azure dev docker registry
         uses: azure/docker-login@v1
         if: env.PERFORM_PUSH == 'true'
@@ -165,6 +178,7 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ steps.meta-fallback.outputs.tags }}
+            ${{ steps.pull-repo.outputs.tags }}
 
           labels: |
             ${{ steps.meta.outputs.labels }}
