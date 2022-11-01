@@ -33,9 +33,7 @@ jobs:
   build-and-test:
     name: Builds and tests Golang project
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: '${{ inputs.working-directory }}'
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
@@ -52,14 +50,14 @@ jobs:
         run: git config --global url."https://${USER}:${TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: Vet
-        if: ${{ env.DO_VET }}
+        if: ${{ inputs.go-vet  }} == 'true'
         env:
           DO_VET: ${{ inputs.go-vet }}
           GOPRIVATE: github.com/quantik-no/*
         run: go vet -v ./...
 
       - name: Test
-        if: ${{ env.DO_TEST }}
+        if: ${{ inputs.go-test }} == 'true'
         env:
           DO_TEST: ${{ inputs.go-test }}
           GOPRIVATE: github.com/quantik-no/*
