@@ -1,0 +1,45 @@
+name: Quantik Golang Build
+
+on:
+  workflow_call:
+    inputs:
+      git-auth-user:
+        required: true
+        description: 'The user the PAT below belongs to'
+    secrets:
+      git-auth-token:
+        required: true
+        description: 'The PAT for accessing private repos'
+
+
+jobs:
+  build-and-test:
+    name: Builds and tests Golang project
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: '${{ inputs.working-directory }}'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          cache: true
+        # just use latest for now
+        #   go-version: 1.19
+      - name: Configure git for private modules
+        env:
+          TOKEN: ${{ secrets.git-auth-token }}
+          USER: ${{ secrets.git-auth-user }}
+        run: git config --global url."https://${USER}:${TOKEN}@github.com".insteadOf "https://github.com"
+
+      - name: Vet
+        env:
+          GOPRIVATE: github.com/quantik-no/*
+        run: go vet -v ./...
+
+      - name: Test
+        env:
+          GOPRIVATE: github.com/quantik-no/*
+        run: go test -v ./...
+
