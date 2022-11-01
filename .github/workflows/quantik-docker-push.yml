@@ -6,6 +6,9 @@ on:
       nuget-auth-token:
         required: false
         description: 'The PAT for accessing the nuget local repo'
+      git-auth-token:
+        required: false
+        description: 'The PAT for accessing git repos via .netrc'
       acr-password:
         required: false
       acr-name:
@@ -18,6 +21,12 @@ on:
         required: false
         type: string
         default: "./"
+
+      git-auth-name:
+        required: false
+        type: string
+        description: 'The user connected to git-auth-token PAT'
+
       nuget-auth-name:
         required: false
         type: string
@@ -186,7 +195,10 @@ jobs:
             ${{ steps.meta-semver.outputs.labels }}
             ${{ steps.meta-fallback.outputs.labels }}
 
+          secret:
+            netrc="machine github.com login ${{ secrets.git-auth-user }} password ${{ secrets.git-auth-token}}"
           secret-files: |
             nugetconfig=${{ github.workspace }}/../nuget.config
             nugetpublic=${{ github.workspace }}/nuget.config
+
 
