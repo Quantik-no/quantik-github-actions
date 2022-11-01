@@ -4,11 +4,12 @@ on:
   workflow_call:
     inputs:
       git-auth-user:
-        required: true
+        required: false
+        type: string
         description: 'The user the PAT below belongs to'
     secrets:
       git-auth-token:
-        required: true
+        required: false
         description: 'The PAT for accessing private repos'
 
 
@@ -28,6 +29,8 @@ jobs:
         # just use latest for now
         #   go-version: 1.19
       - name: Configure git for private modules
+
+        if: ${{ env.TOKEN }} && ${{ env.USER }}
         env:
           TOKEN: ${{ secrets.git-auth-token }}
           USER: ${{ secrets.git-auth-user }}
