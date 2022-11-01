@@ -7,6 +7,18 @@ on:
         required: false
         type: string
         default: "./"
+
+      go-vet:
+        required: false
+        type: boolean
+        default: true
+
+      go-test:
+        required: false
+        type: boolean
+        default: true
+
+
       git-auth-user:
         required: false
         type: string
@@ -40,12 +52,20 @@ jobs:
         run: git config --global url."https://${USER}:${TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: Vet
+        if: ${{ env.DO_VET }}
         env:
+          DO_VET: ${{ inputs.go-vet }}
           GOPRIVATE: github.com/quantik-no/*
         run: go vet -v ./...
 
       - name: Test
+        if: ${{ env.DO_TEST }}
         env:
+          DO_TEST: ${{ inputs.go-test }}
           GOPRIVATE: github.com/quantik-no/*
         run: go test -v ./...
 
+      - name: Build
+        env:
+          GOPRIVATE: github.com/quantik-no/*
+        run: go build -v ./...
