@@ -22,7 +22,7 @@ on:
         type: string
         default: "./"
 
-      git-auth-name:
+      git-auth-user:
         required: false
         type: string
         description: 'The user connected to git-auth-token PAT'
