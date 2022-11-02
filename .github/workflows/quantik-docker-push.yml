@@ -71,6 +71,7 @@ on:
         required: false
         type: string
 permissions:
+
   id-token: write # This is required for requesting the JWT
   contents: read
 
@@ -195,10 +196,11 @@ jobs:
             ${{ steps.meta-semver.outputs.labels }}
             ${{ steps.meta-fallback.outputs.labels }}
 
-          secret:
-            netrc="machine github.com login ${{ inputs.git-auth-user }} password ${{ secrets.git-auth-token}}"
+          secrets:
+            "netrc=machine github.com login ${{ inputs.git-auth-user }} password ${{ secrets.git-auth-token}}"
           secret-files: |
             nugetconfig=${{ github.workspace }}/../nuget.config
             nugetpublic=${{ github.workspace }}/nuget.config
+            gitconfig=${{ github.workspace }}/.gitconfig
 
 
