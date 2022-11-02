@@ -196,7 +196,7 @@ jobs:
             ${{ steps.meta-fallback.outputs.labels }}
 
           secret:
-            netrc="machine github.com login ${{ secrets.git-auth-user }} password ${{ secrets.git-auth-token}}"
+            netrc="machine github.com login ${{ inputs.git-auth-user }} password ${{ secrets.git-auth-token}}"
           secret-files: |
             nugetconfig=${{ github.workspace }}/../nuget.config
             nugetpublic=${{ github.workspace }}/nuget.config

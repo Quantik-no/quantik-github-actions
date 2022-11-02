@@ -46,7 +46,7 @@ jobs:
         if: ${{ env.TOKEN }} && ${{ env.USER }}
         env:
           TOKEN: ${{ secrets.git-auth-token }}
-          USER: ${{ secrets.git-auth-user }}
+          USER: ${{ inputs.git-auth-user }}
         run: git config --global url."https://${USER}:${TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: Vet
