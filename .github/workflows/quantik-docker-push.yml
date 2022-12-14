@@ -70,6 +70,10 @@ on:
       gar-name:
         required: false
         type: string
+      semver:
+        required: false
+        type: boolean
+        default: true
 permissions:
 
   id-token: write # This is required for requesting the JWT
@@ -100,7 +104,7 @@ jobs:
       - name: Docker meta semver version
         id: meta-semver
         uses: docker/metadata-action@v4
-        if: steps.git_describe_semver.outcome == 'success'
+        if: steps.git_describe_semver.outcome == 'success' && inputs.semver
         with:
           images: |
             ${{ inputs.gar-name }}/${{ inputs.image-name }}
@@ -114,13 +118,13 @@ jobs:
 
       - name: Docker meta for semver fallback
         id: fallback-version
-        if: steps.git_describe_semver.outcome == 'failure'
+        if: steps.git_describe_semver.outcome == 'failure' || !inputs.semver
         run: echo "::set-output name=version::$(printf '%(%Y-%m-%d)T' -1)-$(printf "%05d" ${{ github.run_number }})"
 
       - name: Docker meta fallback version
         id: meta-fallback
         uses: docker/metadata-action@v4
-        if: steps.git_describe_semver.outcome == 'failure'
+        if: steps.git_describe_semver.outcome == 'failure' || !inputs.semver
         with:
           images: |
             ${{ inputs.gar-name }}/${{ inputs.image-name }}
