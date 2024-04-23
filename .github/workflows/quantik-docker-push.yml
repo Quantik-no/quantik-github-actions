@@ -94,13 +94,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - uses: docker://ghcr.io/choffmeister/git-describe-semver
-        id: git_describe_semver
-        continue-on-error: true
+      - id: git-describe-semver
+        uses: choffmeister/git-describe-semver@main
         with:
-          args: --prerelease-timestamped  --fallback v0.0.0 --drop-prefix --format "::set-output name=version::<version>"
-
+          version: latest
+          dir: .
+          fallback: v0.0.0
+          drop-prefix: true
+          prerelease-timestamped: true
+          format: "::set-output name=version::<version>"
+          continue-on-error: true
       - name: Docker meta semver version
         id: meta-semver
         uses: docker/metadata-action@v4
@@ -120,7 +123,6 @@ jobs:
         id: fallback-version
         if: steps.git_describe_semver.outcome == 'failure' || !inputs.semver
         run: echo "::set-output name=version::$(printf '%(%Y-%m-%d)T' -1)-$(printf "%05d" ${{ github.run_number }})"
-
       - name: Docker meta fallback version
         id: meta-fallback
         uses: docker/metadata-action@v4
