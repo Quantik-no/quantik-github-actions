@@ -41,15 +41,15 @@ on:
         type: string
         default: "${{ github.event.repository.name }}"
 
-      gcp-oidc:
-        required: false
-        type: string
-        default: projects/545027634067/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider
+      # gcp-oidc:
+      #   required: false
+      #   type: string
+      #   default: projects/545027634067/locations/global/workloadIdentityPools/github-identity-pool/providers/github-identity-provider
 
-      gcp-sa:
-        required: false
-        default: github-actions-sa@qt-github-oidc.iam.gserviceaccount.com
-        type: string
+      # gcp-sa:
+      #   required: false
+      #   default: github-actions-sa@qt-github-oidc.iam.gserviceaccount.com
+      #   type: string
 
       dockerfile:
         required: false
@@ -67,9 +67,9 @@ on:
         required: false
         type: string
         description: "An input for setting an extra repo in case you want to pull from e.g dev and push to prod"
-      gar-name:
-        required: false
-        type: string
+      # gar-name:
+      #   required: false
+      #   type: string
       semver:
         required: false
         type: boolean
@@ -110,7 +110,7 @@ jobs:
         if: steps.git_describe_semver.outcome == 'success' && inputs.semver
         with:
           images: |
-            ${{ inputs.gar-name }}/${{ inputs.image-name }}
+            # ${{ inputs.gar-name }}/${{ inputs.image-name }}
             ${{ secrets.acr-name }}/${{ inputs.image-name }}
           labels: |
             org.opencontainers.image.version=${{ steps.git_describe_semver.outputs.version }}
@@ -129,7 +129,7 @@ jobs:
         if: steps.git_describe_semver.outcome == 'failure' || !inputs.semver
         with:
           images: |
-            ${{ inputs.gar-name }}/${{ inputs.image-name }}
+            # ${{ inputs.gar-name }}/${{ inputs.image-name }}
             ${{ secrets.acr-name }}/${{ inputs.image-name }}
           labels: |
             org.opencontainers.image.version=${{ steps.fallback-version.outputs.version }}
